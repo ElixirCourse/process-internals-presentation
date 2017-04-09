@@ -83,8 +83,10 @@ defmodule Responder do
     Process.register(self(), :responder)
 
     receive do
-      {pid, :ping} when is_pid(pid) -> send(pid, :pong)
-      {pid, anything} when is_pid(pid) -> send(pid, "I received #{anything}.")
+      {pid, :ping} when is_pid(pid) ->
+        send(pid, :pong)
+      {pid, anything} when is_pid(pid) ->
+        send(pid, "I received #{anything}.")
     end
   end
 end
@@ -129,7 +131,7 @@ spawn(Responder, :run, [])
 ### Heap
 * При стартиране на процеса, heap-ът му също е малък, но може да се разширява нагоре.
 * Тук се намира и опашката от идващи съобщения на процеса. <!-- .element: class="fragment" -->
-* Тук се пазят непроменимите структури като списъци, кортежи, както и числа с плаваща запетая, малки `binary`-та (под 64 байта). <!-- .element: class="fragment" -->
+* Тук се пазят непроменимите структури като списъци, кортежи, както и числа с плаваща запетая, малки binary-та (под 64 байта). <!-- .element: class="fragment" -->
 * За по-големите, Refc binary-а се пазят само указателите ProcBin. <!-- .element: class="fragment" -->
 
 #HSLIDE
@@ -176,17 +178,21 @@ send(:responder, {self(), :ping})
 defmodule Responder do
   def run do
     Process.register(self(), :responder)
-
     receive do
-      {pid, :ping} when is_pid(pid) -> send(pid, :pong)
-      {pid, anything} when is_pid(pid) -> send(pid, "I received #{anything}.")
-      anything -> IO.puts("Unexpected message received : #{anything}")
+      {pid, :ping} when is_pid(pid) ->
+        send(pid, :pong)
+      {pid, anything} when is_pid(pid) ->
+        send(pid, "I received #{anything}.")
+      anything ->
+        IO.puts("Unexpected message received : #{anything}")
     end
   end
 end
+```
 
+#HSLIDE
+```elixir
 spawn(Responder, :run, [])
-
 send(:responder, "junk")
 # Ще видим 'Unexpected message received : junk'
 ```
@@ -210,8 +216,10 @@ defmodule Responder do
   defp wait do
     receive do
       {pid, :ping} when is_pid(pid) -> send(pid, :pong)
-      {pid, anything} when is_pid(pid) -> send(pid, "I received #{anything}.")
-      anything -> IO.puts("Unexpected message received : #{anything}")
+      {pid, anything} when is_pid(pid) ->
+        send(pid, "I received #{anything}.")
+      anything ->
+        IO.puts("Unexpected message received : #{anything}")
     end
   end
 end
@@ -259,7 +267,7 @@ defmodule Responder do
         send(pid, "I received #{anything}.")
         run()
       anything ->
-        IO.puts("Unexpected message received : #{anything}. Exiting!")
+        IO.puts("Unexpected message received : #{anything}.")
     end
   end
 end
@@ -274,7 +282,7 @@ end
 # Ще видим 10 'pong'
 
 send(pid, "Bye")
-# Unexpected message received : Bye. Exiting!
+# Unexpected message received : Bye.
 Process.alive?(pid)
 # false
 ```
@@ -295,10 +303,8 @@ defmodule Fibonacci do
       anything ->
         IO.puts(:stderr, "Bad query #{anything}")
     end
-
     run()
   end
-
   defp nth(1), do: 1
   defp nth(2), do: 1
   defp nth(n), do: nth(n - 1) + nth(n - 2)
@@ -417,7 +423,7 @@ Flusher.flush_it
 #HSLIDE
 #### Случай 2
 ```
-spawn -> fullsweep GC -> generational GC -> generational GC -> ...  -> end
+spawn -> fullsweep -> generational -> generational -> ...  -> end
 ```
 
 #HSLIDE
@@ -439,8 +445,8 @@ Process.info(pid, :garbage_collection)
   :garbage_collection,
   [
     max_heap_size: %{error_logger: true, kill: true, size: 0},
-    min_bin_vheap_size: 46422, min_heap_size: 233, fullsweep_after: 65535,
-    minor_gcs: 0
+    min_bin_vheap_size: 46422, min_heap_size: 233,
+    fullsweep_after: 65535, minor_gcs: 0
   ]
 }
 ```
